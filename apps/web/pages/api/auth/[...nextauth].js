@@ -62,4 +62,5 @@ export default NextAuth({
   },
   // Optional SQL or MongoDB database to persist users
   database: process.env.MONGODB_URI,
+  nextauth_url: process.env.NEXTAUTH_URL,
 });
