@@ -4,12 +4,12 @@
 //   OrderedListOutlined,
 //   SnippetsOutlined,
 // } from "@ant-design/icons";
-import withLayout from "components/globalLayout.js";
 // import { applySession } from "next-session";
 import { useSession } from "next-auth/client";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { Col, Row, Select } from "ui";
+import withLayout from "../components/globalLayout";
 // import style from "../styles/Home.module.css";
 
 const { Option } = Select;

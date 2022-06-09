@@ -1,5 +1,5 @@
-import withLayout from "components/globalLayout.js";
 import { Calendar, Card, Col, Row } from "ui";
+import withLayout from "../components/globalLayout";
 
 function Classes() {
   const onPanelChange = (value, mode) => {

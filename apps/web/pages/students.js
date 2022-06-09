@@ -1,4 +1,3 @@
-import withLayout from "components/globalLayout.js";
 // import { applySession, withSession } from "next-session";
 import { getSession } from "next-auth/client";
 import React, {
@@ -6,9 +5,10 @@ import React, {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import { Button, Col, Form, Input, Popconfirm, Row, Select, Table } from "ui";
+import withLayout from "../components/globalLayout";
 import Student from "../models/Student";
 
 const { Option } = Select;

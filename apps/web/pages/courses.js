@@ -1,5 +1,4 @@
 // import Button from "ui/button";
-import withLayout from "components/globalLayout.js";
 import { applySession } from "next-session";
 import React, {
   createContext,
@@ -9,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import { Col, Form, Input, Popconfirm, Row, Select, Table } from "ui";
+import withLayout from "../components/globalLayout";
 import { sessionOptions } from "../lib/config";
 import Course from "../models/Course";
 import Student from "../models/Student";

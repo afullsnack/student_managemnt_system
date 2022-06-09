@@ -3,7 +3,7 @@ import { useSession } from "next-auth/client";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { Col, Row, Table } from "ui";
-import withLayout from "../components/globalLayout.js";
+import withLayout from "../components/globalLayout";
 
 function Dashboard() {
   const router = useRouter();
