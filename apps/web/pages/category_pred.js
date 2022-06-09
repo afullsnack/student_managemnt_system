@@ -18,7 +18,7 @@ function CategoryPred() {
   const [session, loading] = useSession();
   console.log(session, loading, "Session data");
 
-  useEffect(async () => {
+  useEffect(() => {
     return () => {};
   }, []);
 

@@ -2,18 +2,8 @@
 import { useSession } from "next-auth/client";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import {
-  ArrowRightOutlined,
-  Card,
-  Col,
-  DatabaseOutlined,
-  OrderedListOutlined,
-  Row,
-  SnippetsOutlined,
-  Table,
-} from "ui";
+import { Col, Row, Table } from "ui";
 import withLayout from "../components/globalLayout.js";
-import style from "../styles/Home.module.css";
 
 function Dashboard() {
   const router = useRouter();
@@ -48,56 +38,56 @@ function Dashboard() {
     },
   ];
 
-  const GradingCard = React.forwardRef(({ onClick, href }, ref) => {
-    return (
-      <a href={href} onClick={onClick} ref={ref}>
-        <Card title="Grades" extra={<SnippetsOutlined />} hoverable>
-          <Card.Meta
-            title="Grading info"
-            description={
-              <span className={style.dashboard_primary_span}>
-                View grading info <ArrowRightOutlined />{" "}
-              </span>
-            }
-          />
-        </Card>
-      </a>
-    );
-  });
-  const CourseCard = React.forwardRef(({ onClick, href }, ref) => {
-    return (
-      <a href={href} onClick={onClick} ref={ref}>
-        <Card title="Courses" extra={<OrderedListOutlined />} hoverable>
-          <Card.Meta
-            title="Current Courses"
-            description={
-              <span className={style.dashboard_primary_span}>
-                View current courses <ArrowRightOutlined />{" "}
-              </span>
-            }
-          />
-        </Card>
-      </a>
-    );
-  });
-  const StudentCard = React.forwardRef(({ onClick, href }, ref) => {
-    return (
-      <a href={href} onClick={onClick} ref={ref}>
-        <Card title="My Data" extra={<DatabaseOutlined />} hoverable>
-          <Card.Meta
-            title="Edit Data"
-            description={
-              <span className={style.dashboard_primary_span}>
-                Edit student data <ArrowRightOutlined />{" "}
-              </span>
-            }
-          />
-        </Card>
-      </a>
-    );
-  });
+  // const GradingCard = React.forwardRef(({ onClick, href }, ref) => {
+  //   return (
+  //     <a href={href} onClick={onClick} ref={ref}>
+  //       <Card title="Grades" extra={<SnippetsOutlined />} hoverable>
+  //         <Card.Meta
+  //           title="Grading info"
+  //           description={
+  //             <span className={style.dashboard_primary_span}>
+  //               View grading info <ArrowRightOutlined />{" "}
+  //             </span>
+  //           }
+  //         />
+  //       </Card>
+  //     </a>
+  //   );
+  // });
+  // const CourseCard = React.forwardRef(({ onClick, href }, ref) => {
+  //   return (
+  //     <a href={href} onClick={onClick} ref={ref}>
+  //       <Card title="Courses" extra={<OrderedListOutlined />} hoverable>
+  //         <Card.Meta
+  //           title="Current Courses"
+  //           description={
+  //             <span className={style.dashboard_primary_span}>
+  //               View current courses <ArrowRightOutlined />{" "}
+  //             </span>
+  //           }
+  //         />
+  //       </Card>
+  //     </a>
+  //   );
+  // });
+  // const StudentCard = React.forwardRef(({ onClick, href }, ref) => {
+  //   return (
+  //     <a href={href} onClick={onClick} ref={ref}>
+  //       <Card title="My Data" extra={<DatabaseOutlined />} hoverable>
+  //         <Card.Meta
+  //           title="Edit Data"
+  //           description={
+  //             <span className={style.dashboard_primary_span}>
+  //               Edit student data <ArrowRightOutlined />{" "}
+  //             </span>
+  //           }
+  //         />
+  //       </Card>
+  //     </a>
+  //   );
+  // });
 
-  useEffect(async () => {
+  useEffect(() => {
     return () => {};
   }, []);
 
