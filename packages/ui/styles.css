@@ -1,0 +1,36 @@
+.test-btn {
+  padding: 10px;
+  background-color: aqua;
+  color: white;
+}
+
+.test-btn:hover {
+  background-color: aquamarine;
+  border: 1px solid brown;
+}
+
+.myrow {
+  margin: 0;
+  padding: 20px;
+  width: 100%;
+}
+
+.full_view {
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.header_text {
+  color: white;
+}
+
+.editable_row .ant-form-item-explain {
+  position: absolute;
+  top: 100%;
+  font-size: 12px;
+}
+
+.dashboard_primary_span {
+  color: #1890ff;
+}

@@ -7,9 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --filter=./apps/web...",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
+    "test": "pnpm run build && turbo run test --filter=./apps/web",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
