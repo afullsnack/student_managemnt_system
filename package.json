@@ -11,6 +11,7 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "test": "pnpm run build && turbo run test --filter=./apps/web",
+    "deploy": "turbo run build --include-dependencies --no-deps",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
