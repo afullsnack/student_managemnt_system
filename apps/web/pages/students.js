@@ -13,7 +13,17 @@ import Student from "../models/Student";
 
 const { Option } = Select;
 
-function Students({ user, student }) {
+function Students({ user, students }) {
+  console.log(user, students, "Data log in students page");
+  const [studentDataSource, setStudentDataSource] = useState([]);
+
+  useEffect(() => {
+    setStudentDataSource(students);
+    return () => {
+      setStudentDataSource([]);
+    };
+  }, [user, students]);
+
   const EditableContext = createContext(null);
 
   const EditableRow = ({ index, ...props }) => {
@@ -96,160 +106,139 @@ function Students({ user, student }) {
     return <td {...restProps}>{childNode}</td>;
   };
 
-  class EditableTable extends React.Component {
-    constructor(props) {
-      super(props);
-      this.columns = [
-        {
-          title: "Name",
-          dataIndex: "name",
-          width: "20%",
-          editable: true,
-        },
-        {
-          title: "Email",
-          dataIndex: "email",
-          width: "20%",
-          editable: true,
-        },
-        {
-          title: "Matric No.",
-          dataIndex: "matric",
-          width: "20%",
-          editable: true,
-        },
-        {
-          title: "Semester",
-          dataIndex: "semester",
-          width: "10%",
-          editable: true,
-        },
-        {
-          title: "Action",
-          dataIndex: "action",
-          width: "10%",
-          render: (_, record) =>
-            this.state.dataSource.length >= 1 ? (
-              <Popconfirm
-                title="Sure to delete?"
-                onConfirm={() => this.handleDelete(record.key)}
-              >
-                <a>Remove</a>
-              </Popconfirm>
-            ) : null,
-        },
-      ];
-      this.state =
-        props.courses != null
-          ? {
-              dataSource: [
-                props?.courses?.map((course, i) => {
-                  return {
-                    key: i.toString(),
-                    name: course?.code,
-                    title: course?.title,
-                    unit: course?.ccu,
-                  };
-                }),
-              ],
-              count: 5,
-            }
-          : {
-              dataSource: [
-                {
-                  key: "0",
-                  name: "Student name",
-                  email: "student@hillcityuniversity.org",
-                  matric: "1232/1344/4444",
-                  semester: "1s(Spring)",
-                },
-                {
-                  key: "1",
-                  name: "Student name 2",
-                  email: "student@hillcityuniversity.org",
-                  matric: "1232/1344/9999",
-                  semester: "1s(Spring)",
-                },
-                {
-                  key: "3",
-                  name: "Student name 3",
-                  email: "student@hillcityuniversity.org",
-                  matric: "1232/1344/0000",
-                  semester: "1s(Spring)",
-                },
-              ],
-              count: 3,
-            };
-    }
+  function EditableTable({ students }) {
+    let columns = [
+      {
+        title: "First Name",
+        dataIndex: "firstname",
+        key: "firstname",
+        width: "20%",
+        editable: true,
+      },
+      {
+        title: "Last Name",
+        dataIndex: "lastname",
+        key: "lastname",
+        width: "20%",
+        editable: true,
+      },
+      {
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+        width: "20%",
+        editable: true,
+      },
+      {
+        title: "Matric No.",
+        dataIndex: "matric_no",
+        key: "matric_no",
+        width: "20%",
+        editable: true,
+      },
+      {
+        title: "Semester",
+        dataIndex: "semester",
+        key: "semester",
+        width: "10%",
+        editable: true,
+      },
+      {
+        title: "Action",
+        dataIndex: "action",
+        key: "action",
+        width: "10%",
+        render: (_, record) =>
+          dataSource.length >= 1 ? (
+            <Popconfirm
+              title="Sure to delete?"
+              onConfirm={() => handleDelete(record.key)}
+            >
+              <a>Remove</a>
+            </Popconfirm>
+          ) : null,
+      },
+    ];
+    console.log(students, "Props log");
+    const [dataSource, setDataSource] = useState([]);
+    const [count, setCount] = useState(5);
 
-    handleDelete = (key) => {
-      const dataSource = [...this.state.dataSource];
-      this.setState({
-        dataSource: dataSource.filter((item) => item.key !== key),
-      });
+    useEffect(() => {
+      setDataSource(
+        students?.map((student, i) => {
+          return {
+            key: i.toString(),
+            firstname: student?.firstname,
+            lastname: student?.lastname,
+            email: student?.email,
+            matric_no: student?.matric_no,
+            semester: student?.semester,
+          };
+        })
+      );
+    }, [students]);
+
+    const handleDelete = (key) => {
+      // const dataSource = [...dataSource];
+      setDataSource(dataSource.filter((item) => item.key !== key));
     };
-    handleAdd = () => {
-      const { count, dataSource } = this.state;
+    const handleAdd = () => {
+      // const { count, dataSource } = this.state;
       const newData = {
         key: count,
-        name: `Enter name`,
+        firstname: `Enter first name`,
+        lastname: `Enter last name`,
         email: "Enter email",
-        matric: `Enter matric`,
+        matric_no: `Enter matric no.`,
         semester: `1st(Spring)`,
       };
-      this.setState({
-        dataSource: [...dataSource, newData],
-        count: count + 1,
-      });
+      setDataSource([...dataSource, newData]);
+      setCount(count + 1);
     };
-    handleSave = (row) => {
-      const newData = [...this.state.dataSource];
+    const handleSave = (row) => {
+      const newData = [...dataSource];
       const index = newData.findIndex((item) => row.key === item.key);
       const item = newData[index];
       newData.splice(index, 1, { ...item, ...row });
-      this.setState({
-        dataSource: newData,
-      });
+      setDataSource(newData);
+    };
+    const components = {
+      body: {
+        row: EditableRow,
+        cell: EditableCell,
+      },
     };
 
-    render() {
-      const { dataSource } = this.state;
-      const components = {
-        body: {
-          row: EditableRow,
-          cell: EditableCell,
-        },
+    columns = columns.map((col) => {
+      if (!col.editable) {
+        return col;
+      }
+
+      return {
+        ...col,
+        onCell: (record) => ({
+          record,
+          editable: col.editable,
+          dataIndex: col.dataIndex,
+          key: col.key,
+          title: col.title,
+          handleSave: handleSave,
+        }),
       };
-      const columns = this.columns.map((col) => {
-        if (!col.editable) {
-          return col;
-        }
+    });
+    return (
+      <div>
+        <Button onClick={handleAdd}>Add Student</Button>
 
-        return {
-          ...col,
-          onCell: (record) => ({
-            record,
-            editable: col.editable,
-            dataIndex: col.dataIndex,
-            title: col.title,
-            handleSave: this.handleSave,
-          }),
-        };
-      });
-      return (
-        <div>
-          <Button onClick={this.handleAdd}>Add Student</Button>
-
-          <Table
-            components={components}
-            rowClassName={() => "editable-row"}
-            bordered
-            dataSource={dataSource}
-            columns={columns}
-          />
-        </div>
-      );
-    }
+        <Table
+          components={components}
+          rowClassName={() => "editable-row"}
+          bordered
+          dataSource={dataSource}
+          columns={columns}
+        />
+      </div>
+    );
   }
   const [loading, setLoading] = useState(false);
   return (
@@ -262,14 +251,13 @@ function Students({ user, student }) {
           <h1>Add Students</h1>
         </Col>
         <Col span={24}>
-          <EditableTable courses={null} />
+          <EditableTable students={studentDataSource} />
         </Col>
 
         <Col span={24}>
           <Button
             onClick={async (e) => {
               setLoading(true);
-              setTimeout(() => setLoading(false), 1000);
             }}
             loading={loading}
             type="link"
@@ -293,42 +281,18 @@ export async function getServerSideProps(ctx) {
     const session = await getSession(ctx);
     console.log("USER SESSION from server side props", session);
 
-    let student = session?.user
-      ? await Student.findOne({ email: session?.user?.email })
-      : null;
-    console.log(student, "student");
-
-    let user = JSON.stringify(session.user);
-    student = JSON.stringify(student);
+    const { user } = session;
+    const students = await Student.find({});
+    console.log(students, "students logs");
 
     // if (!req?.session?.user) return { props: {} };
     return {
-      props: { user, student },
+      props: { user, students: JSON.parse(JSON.stringify(students)) },
     };
   } catch (e) {
+    console.error(e);
     return {
       props: {},
     };
   }
 }
-
-// export const getServerSideProps = withSession(async function ({ req, res }) {
-//   // Get the user's session based on the request
-//   const user = req.session.get("user");
-
-//   let student = user ? await Student.findOne({ email: user?.email }) : null;
-//   console.log(student, "student");
-
-//   // if (!user) {
-//   //   return {
-//   //     redirect: {
-//   //       destination: "/login",
-//   //       permanent: false,
-//   //     },
-//   //   };
-//   // }
-
-//   return {
-//     props: { user },
-//   };
-// });

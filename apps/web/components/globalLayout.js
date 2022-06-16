@@ -1,5 +1,6 @@
+import { signOut } from "next-auth/client";
 import { useState } from "react";
-import { Layout, LeftOutlined, RightOutlined } from "ui";
+import { Button, Image, Layout, LeftOutlined, RightOutlined } from "ui";
 import styles from "../styles/Home.module.css";
 import Navigation from "./navigation";
 
@@ -10,11 +11,36 @@ export default function withLayout(BaseComp) {
     const [collapsed, setCollapsed] = useState(false);
     return (
       <Layout className={styles.full_view}>
-        <Header>
-          <h3 style={{ color: "white" }}>Admin</h3>
+        <Header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image src="/hcub-png-white.png" width={60} preview={false} />
+            <h3 style={{ color: "white", marginLeft: 20 }}>Admin</h3>
+          </div>
+          <Button
+            onClick={() => signOut({ callbackUrl: "http://localhost:3000/" })}
+            danger
+          >
+            Logout
+          </Button>
         </Header>
         <Layout
-          style={{ height: "100%", minHeight: "100%", overflowY: "scroll" }}
+          style={{
+            height: "calc(100vh - 68px)",
+            minHeight: "calc(100vh - 68px)",
+            overflowY: "scroll",
+          }}
         >
           <Sider
             style={{ height: "100%", position: "fixed", left: 0, top: 64 }}

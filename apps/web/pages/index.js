@@ -3,7 +3,7 @@ import { signIn, useSession } from "next-auth/client";
 import { applySession } from "next-session";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Button, Card, Col, Input, message, Row } from "ui";
+import { Button, Card, Col, Image, Input, message, Row } from "ui";
 import { sessionOptions, url } from "../lib/config";
 import { createAccount } from "../lib/user";
 import styles from "../styles/Home.module.css";
@@ -31,6 +31,15 @@ function Home() {
         sm={{ span: 18 }}
         lg={{ span: 12 }}
       >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Image src="/hcub-png-white.png" width={150} preview={false} />
+        </div>
         <Card hoverable>
           {hasAccount && <LoginView />}
           {!hasAccount && <CreateAccountView />}

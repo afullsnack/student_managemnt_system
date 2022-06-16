@@ -19,8 +19,21 @@ try {
     semester: {
       type: String,
     },
+    students: { type: [ObjectId], ref: "Student" },
+    attendance: [
+      {
+        score: { type: Number, default: 0 },
+        student: { type: ObjectId, ref: "Student" },
+      },
+    ],
+    marks: [
+      {
+        score: { type: Number, default: 0 },
+        student: { type: ObjectId, ref: "Student" },
+      },
+    ],
   });
-  Course = mongoose.model("Course", CourseSchema);
+  Course = mongoose.models.Course || mongoose.model("Course", CourseSchema);
 } catch (err) {
   console.log(err.message || err.toString());
 }

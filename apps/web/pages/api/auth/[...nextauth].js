@@ -50,15 +50,24 @@ export default NextAuth({
     async session(session, token) {
       // Add property to session, like an access_token from a provider.
       session.user.id = token.id;
-      console.log(token, "Token object");
+      session.user.name = token.name;
+      // console.log(token, "SESSION DATA");
       return session;
     },
     async jwt(token, user, account, profile, isNewUser) {
-      token.name = user?.username;
+      token.name = user?.name || `${profile?.lastname} ${profile?.firstname}`;
       token.id = user?._id;
-      console.log(token, user);
+      // console.log(token, user, account, profile, "TOKEN DATA");
       return token;
     },
+
+    // async redirect(url, _baseUrl) {
+    //   if (url == "/") {
+    //     return Promise.resolve("/");
+    //   }
+
+    //   return Promise.resolve("/");
+    // },
   },
   // Optional SQL or MongoDB database to persist users
   database: process.env.MONGODB_URI,

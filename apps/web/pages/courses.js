@@ -1,5 +1,5 @@
 // import Button from "ui/button";
-import { applySession } from "next-session";
+import { getSession } from "next-auth/client";
 import React, {
   createContext,
   useContext,
@@ -7,9 +7,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Col, Form, Input, Popconfirm, Row, Select, Table } from "ui";
+import { Col, Form, Input, message, Popconfirm, Row, Select, Table } from "ui";
 import withLayout from "../components/globalLayout";
-import { sessionOptions } from "../lib/config";
 import Course from "../models/Course";
 import Student from "../models/Student";
 
@@ -84,7 +83,7 @@ const EditableCell = ({
           },
         ]}
       >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+        <Input size="small" ref={inputRef} onPressEnter={save} onBlur={save} />
       </Form.Item>
     ) : (
       <div
@@ -102,109 +101,136 @@ const EditableCell = ({
   return <td {...restProps}>{childNode}</td>;
 };
 
-class EditableTableAtt extends React.Component {
-  constructor(props) {
-    super(props);
-    this.columns = [
-      {
-        title: "Name",
-        dataIndex: "name",
-        width: "20%",
-        editable: true,
-      },
-      {
-        title: "Course",
-        dataIndex: "course",
-        width: "50%",
-        editable: true,
-      },
-      {
-        title: "Semester",
-        dataIndex: "semester",
-        width: "10%",
-        editable: true,
-      },
-      {
-        title: "Attended",
-        dataIndex: "attended",
-        width: "5%",
-        editable: true,
-      },
-      {
-        title: "Total Lectures",
-        dataIndex: "total",
-        width: "5%",
-        editable: true,
-      },
-      {
-        title: "Action",
-        dataIndex: "action",
-        width: "10%",
-        render: (_, record) =>
-          this.state.dataSource.length >= 1 ? (
-            <Popconfirm
-              title="Sure to delete?"
-              onConfirm={() => this.handleDelete(record.key)}
-            >
-              <a>Remove</a>
-            </Popconfirm>
-          ) : null,
-      },
-    ];
-    this.state =
-      props.courses != null
-        ? {
-            dataSource: [
-              props?.courses?.map((course, i) => {
-                return {
-                  key: i.toString(),
-                  name: course?.code,
-                  title: course?.title,
-                  unit: course?.ccu,
-                };
-              }),
-            ],
-            count: 5,
-          }
-        : {
-            dataSource: [
-              {
-                key: "0",
-                name: "Student name",
-                course: "Elementary Mathematics (Algebra and Trigonometry)",
-                semester: "1s(Spring)",
-                attended: "23",
-                total: "28",
-              },
-              {
-                key: "1",
-                name: "Student name",
-                course: "Elementary Physics",
-                semester: "1s(Spring)",
-                attended: "12",
-                total: "28",
-              },
-              {
-                key: "3",
-                name: "Student name",
-                course: "Research Methodology",
-                semester: "1s(Spring)",
-                attended: "21",
-                total: "32",
-              },
-            ],
-            count: 3,
-          };
-  }
+function EditableTableAtt({ courses, students }) {
+  // console.log(courses, students, "Data");
+  let columns = [
+    {
+      title: "Code",
+      dataIndex: "code",
+      width: "20%",
+      editable: false,
+    },
+    {
+      title: "Course",
+      dataIndex: "course",
+      width: "50%",
+      editable: false,
+    },
+    {
+      title: "Semester",
+      dataIndex: "semester",
+      width: "10%",
+      editable: false,
+    },
+    {
+      title: "Attended",
+      dataIndex: "attended",
+      width: "5%",
+      editable: true,
+    },
+    {
+      title: "Total",
+      dataIndex: "total",
+      width: "5%",
+      editable: false,
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "10%",
+      render: (_, record) =>
+        dataSource.length >= 1 ? (
+          <Popconfirm
+            title="Sure to update?"
+            onConfirm={() => handleUpdate(record.key, record)}
+          >
+            <a>Update</a>
+          </Popconfirm>
+        ) : null,
+    },
+  ];
+  const [dataSource, setDataSource] = useState([
+    {
+      key: "0",
+      code: "MTH101",
+      course: "Elementary Mathematics (Algebra and Trigonometry)",
+      semester: "1s(Spring)",
+      attended: "23",
+      total: "10",
+    },
+    {
+      key: "1",
+      code: "PHY101",
+      course: "Elementary Physics",
+      semester: "1s(Spring)",
+      attended: "12",
+      total: "10",
+    },
+    {
+      key: "3",
+      code: "RSM101",
+      course: "Research Methodology",
+      semester: "1s(Spring)",
+      attended: "21",
+      total: "10",
+    },
+  ]);
+  const [count, setCount] = useState(0);
+  const [level, setLevel] = useState("100");
+  const [studentList, setStudentList] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState({});
 
-  handleDelete = (key) => {
-    const dataSource = [...this.state.dataSource];
-    this.setState({
-      dataSource: dataSource.filter((item) => item.key !== key),
-    });
+  useEffect(async () => {
+    // Set initial student data
+    const getInitialStudentData = async () => {
+      return await Promise.all(
+        students.filter((stud) => stud?.currentLevel === level)
+      );
+    };
+    setStudentList(students.filter((stud) => stud?.currentLevel === level));
+    setSelectedStudent(
+      students.filter((stud) => stud?.currentLevel === level)[0]
+    );
+
+    console.log(
+      students.filter((stud) => stud?.currentLevel === level),
+      "Student"
+    );
+  }, [courses, students]);
+  // DataSource effect
+  useEffect(() => {
+    if (courses?.length)
+      setDataSource(
+        courses?.map((course, i) => {
+          if (course?.students.some((id) => id === studentList[0]?._id))
+            return {
+              key: i.toString(),
+              code: course?.code,
+              course: course?.title,
+              semester: course?.semester,
+              attended: course?.attendance[0]?.score.toString(),
+              total: "10",
+            };
+        })
+      );
+    setCount(5);
+  }, [studentList, level]);
+
+  const handleUpdate = async (key, record) => {
+    message.info(key);
+    console.log(record, "Record");
+    return;
+    // const dataSource = [...dataSource];
+    // setDataSource(dataSource.filter((item) => item.key !== key));
+    // TODO: Update score to db
+    // const udpateDB = await Course.updateOne(
+    //   { code: record?.code },
+    //   { $set: { "attendance.$[e].score": Number(record?.attended) } },
+    //   { arrayFilters: [{ "e.student": selectedStudent?._id }] }
+    // );
   };
-  handleAdd = () => {
-    const { count, dataSource } = this.state;
+
+  const handleAdd = () => {
     const newData = {
       key: count,
       name: `Student name`,
@@ -213,59 +239,114 @@ class EditableTableAtt extends React.Component {
       attended: `1`,
       total: `12`,
     };
-    this.setState({
-      dataSource: [...dataSource, newData],
-      count: count + 1,
-    });
+    setDataSource([...dataSource, newData]);
+    setCount(count + 1);
   };
-  handleSave = (row) => {
-    const newData = [...this.state.dataSource];
+
+  const handleSave = (row) => {
+    const newData = [...dataSource];
     const index = newData.findIndex((item) => row.key === item.key);
     const item = newData[index];
     newData.splice(index, 1, { ...item, ...row });
-    this.setState({
-      dataSource: newData,
-    });
+    setDataSource(newData);
   };
 
-  render() {
-    const { dataSource } = this.state;
-    const components = {
-      body: {
-        row: EditableRow,
-        cell: EditableCell,
-      },
-    };
-    const columns = this.columns.map((col) => {
-      if (!col.editable) {
-        return col;
-      }
+  const components = {
+    body: {
+      row: EditableRow,
+      cell: EditableCell,
+    },
+  };
 
-      return {
-        ...col,
-        onCell: (record) => ({
-          record,
-          editable: col.editable,
-          dataIndex: col.dataIndex,
-          title: col.title,
-          handleSave: this.handleSave,
-        }),
-      };
-    });
-    return (
-      <div>
+  columns = columns.map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        title: col.title,
+        handleSave: handleSave,
+      }),
+    };
+  });
+
+  return (
+    <Row gutter={[16, 16]}>
+      <Col span={12}>
+        <h1>Level</h1>
+        <Select
+          style={{ width: "100%", marginBottom: 20 }}
+          defaultActiveFirstOption={true}
+          defaultValue={level}
+          placeholder="Students Levels"
+          onChange={async (value) => {
+            setLevel(value);
+            setStudentList(
+              students.filter((stud) => stud?.currentLevel === value)
+            );
+            setSelectedStudent(
+              students.filter((stud) => stud?.currentLevel === value)[0]
+            );
+          }}
+        >
+          <Option key="100" value="100">
+            100
+          </Option>
+          <Option key="200" value="200">
+            200
+          </Option>
+          <Option key="300" value="300">
+            300
+          </Option>
+          <Option key="400" value="400">
+            400
+          </Option>
+        </Select>
+      </Col>
+      <Col span={12}>
         <h1>Students</h1>
         <Select
           style={{ width: "100%", marginBottom: 20 }}
           defaultActiveFirstOption={true}
-          defaultValue="1"
+          value={selectedStudent?._id}
+          onChange={(value) => {
+            studentList.map((stud) => {
+              if (stud?._id === value) setSelectedStudent(stud);
+              return;
+            });
+            setDataSource(
+              courses?.map((course, i) => {
+                if (course?.students.some((id) => id === value))
+                  return {
+                    key: i.toString(),
+                    code: course?.code,
+                    course: course?.title,
+                    semester: course?.semester,
+                    attended: course?.attendance[0]?.score.toString(),
+                    total: "10",
+                  };
+              })
+            );
+          }}
+          placeholder="Students to pick from"
         >
-          <Option key="1">Student name</Option>
-          <Option key="2">Student name 2</Option>
+          {studentList?.map((stud) => (
+            <Option key={stud?._id} value={stud?._id}>
+              {stud?.firstname} {stud?.lastname}
+            </Option>
+          ))}
+          {/* <Option key="2">Student name 2</Option>
           <Option key="3">Student name 3</Option>
-          <Option key="4">Student name 4</Option>
+          <Option key="4">Student name 4</Option> */}
         </Select>
+      </Col>
 
+      <Col span={24}>
         <Table
           components={components}
           rowClassName={() => "editable-row"}
@@ -273,176 +354,249 @@ class EditableTableAtt extends React.Component {
           dataSource={dataSource}
           columns={columns}
         />
-      </div>
-    );
-  }
+      </Col>
+    </Row>
+  );
 }
 
 // Marks table
-class EditableTableMarks extends React.Component {
-  constructor(props) {
-    super(props);
-    this.columns = [
-      {
-        title: "Name",
-        dataIndex: "name",
-        width: "20%",
-        editable: true,
-      },
-      {
-        title: "Course",
-        dataIndex: "course",
-        width: "50%",
-        editable: true,
-      },
-      {
-        title: "Semester",
-        dataIndex: "semester",
-        width: "10%",
-        editable: true,
-      },
-      {
-        title: "Marks",
-        dataIndex: "marks",
-        width: "5%",
-        editable: true,
-      },
-      {
-        title: "Total Marks",
-        dataIndex: "total",
-        width: "5%",
-        editable: true,
-      },
-      {
-        title: "Action",
-        dataIndex: "action",
-        width: "10%",
-        render: (_, record) =>
-          this.state.dataSource.length >= 1 ? (
-            <Popconfirm
-              title="Sure to delete?"
-              onConfirm={() => this.handleDelete(record.key)}
-            >
-              <a>Remove</a>
-            </Popconfirm>
-          ) : null,
-      },
-    ];
-    this.state =
-      props.courses != null
-        ? {
-            dataSource: [
-              props?.courses?.map((course, i) => {
-                return {
-                  key: i.toString(),
-                  name: course?.code,
-                  title: course?.title,
-                  unit: course?.ccu,
-                };
-              }),
-            ],
-            count: 5,
-          }
-        : {
-            dataSource: [
-              {
-                key: "0",
-                name: "Student name",
-                course: "Elementary Mathematics (Algebra and Trigonometry)",
-                semester: "1s(Spring)",
-                marks: "32",
-                total: "60",
-              },
-              {
-                key: "1",
-                name: "Student name",
-                course: "Elementary Physics",
-                semester: "1s(Spring)",
-                marks: "21",
-                total: "60",
-              },
-              {
-                key: "3",
-                name: "Student name",
-                course: "Research Methodology",
-                semester: "1s(Spring)",
-                marks: "43",
-                total: "60",
-              },
-            ],
-            count: 3,
-          };
-  }
+function EditableTableMarks({ courses, students }) {
+  let columns = [
+    {
+      title: "Code",
+      dataIndex: "code",
+      width: "20%",
+      editable: false,
+    },
+    {
+      title: "Course",
+      dataIndex: "course",
+      width: "50%",
+      editable: false,
+    },
+    {
+      title: "Semester",
+      dataIndex: "semester",
+      width: "10%",
+      editable: false,
+    },
+    {
+      title: "Mark",
+      dataIndex: "mark",
+      width: "5%",
+      editable: true,
+    },
+    {
+      title: "Total",
+      dataIndex: "total",
+      width: "5%",
+      editable: false,
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "10%",
+      render: (_, record) =>
+        dataSource.length >= 1 ? (
+          <Popconfirm
+            title="Sure to delete?"
+            onConfirm={() => handleUpdate(record.key, record)}
+          >
+            <a>Update</a>
+          </Popconfirm>
+        ) : null,
+    },
+  ];
+  const [dataSource, setDataSource] = useState([
+    {
+      key: "0",
+      code: "MTH101",
+      course: "Elementary Mathematics (Algebra and Trigonometry)",
+      semester: "1s(Spring)",
+      mark: "23",
+      total: "60",
+    },
+    {
+      key: "1",
+      code: "PHY101",
+      course: "Elementary Physics",
+      semester: "1s(Spring)",
+      mark: "12",
+      total: "60",
+    },
+    {
+      key: "3",
+      code: "RSM101",
+      course: "Research Methodology",
+      semester: "1s(Spring)",
+      mark: "21",
+      total: "60",
+    },
+  ]);
+  const [count, setCount] = useState(0);
+  const [level, setLevel] = useState("100");
+  const [studentList, setStudentList] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState({});
 
-  handleDelete = (key) => {
-    const dataSource = [...this.state.dataSource];
-    this.setState({
-      dataSource: dataSource.filter((item) => item.key !== key),
-    });
+  useEffect(async () => {
+    // Set initial student data
+    const getInitialStudentData = async () => {
+      return await Promise.all(
+        students.filter((stud) => stud?.currentLevel === level)
+      );
+    };
+    setStudentList(students.filter((stud) => stud?.currentLevel === level));
+    setSelectedStudent(
+      students.filter((stud) => stud?.currentLevel === level)[0]
+    );
+
+    console.log(
+      students.filter((stud) => stud?.currentLevel === level),
+      "Student"
+    );
+  }, [courses, students]);
+  // DataSource effect
+  useEffect(() => {
+    if (courses?.length)
+      setDataSource(
+        courses?.map((course, i) => {
+          if (course?.students.some((id) => id === studentList[0]?._id))
+            return {
+              key: i.toString(),
+              code: course?.code,
+              course: course?.title,
+              semester: course?.semester,
+              mark: course?.marks[0]?.score.toString(),
+              total: "60",
+            };
+        })
+      );
+    setCount(5);
+  }, [studentList, level]);
+
+  const handleUpdate = (key, record) => {
+    message.info(key);
+    // const dataSource = [...dataSource];
+    setDataSource(dataSource.filter((item) => item.key !== key));
   };
-  handleAdd = () => {
-    const { count, dataSource } = this.state;
+
+  const handleAdd = () => {
     const newData = {
       key: count,
       name: `Student name`,
       course: "Course title",
       semester: `1st(Spring)`,
-      marks: `0`,
-      total: `60`,
+      attended: `1`,
+      total: `12`,
     };
-    this.setState({
-      dataSource: [...dataSource, newData],
-      count: count + 1,
-    });
+    setDataSource([...dataSource, newData]);
+    setCount(count + 1);
   };
-  handleSave = (row) => {
-    const newData = [...this.state.dataSource];
+
+  const handleSave = (row) => {
+    const newData = [...dataSource];
     const index = newData.findIndex((item) => row.key === item.key);
     const item = newData[index];
     newData.splice(index, 1, { ...item, ...row });
-    this.setState({
-      dataSource: newData,
-    });
+    setDataSource(newData);
   };
 
-  render() {
-    const { dataSource } = this.state;
-    const components = {
-      body: {
-        row: EditableRow,
-        cell: EditableCell,
-      },
-    };
-    const columns = this.columns.map((col) => {
-      if (!col.editable) {
-        return col;
-      }
+  const components = {
+    body: {
+      row: EditableRow,
+      cell: EditableCell,
+    },
+  };
 
-      return {
-        ...col,
-        onCell: (record) => ({
-          record,
-          editable: col.editable,
-          dataIndex: col.dataIndex,
-          title: col.title,
-          handleSave: this.handleSave,
-        }),
-      };
-    });
-    return (
-      <div>
+  columns = columns.map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        title: col.title,
+        handleSave: handleSave,
+      }),
+    };
+  });
+
+  return (
+    <Row gutter={[16, 16]}>
+      <Col span={12}>
+        <h1>Level</h1>
+        <Select
+          style={{ width: "100%", marginBottom: 20 }}
+          defaultActiveFirstOption={true}
+          defaultValue={level}
+          placeholder="Students Levels"
+          onChange={async (value) => {
+            setLevel(value);
+            setStudentList(
+              students.filter((stud) => stud?.currentLevel === value)
+            );
+            setSelectedStudent(
+              students.filter((stud) => stud?.currentLevel === value)[0]
+            );
+          }}
+        >
+          <Option key="100" value="100">
+            100
+          </Option>
+          <Option key="200" value="200">
+            200
+          </Option>
+          <Option key="300" value="300">
+            300
+          </Option>
+          <Option key="400" value="400">
+            400
+          </Option>
+        </Select>
+      </Col>
+      <Col span={12}>
         <h1>Students</h1>
         <Select
           style={{ width: "100%", marginBottom: 20 }}
           defaultActiveFirstOption={true}
-          defaultValue="1"
+          value={selectedStudent?._id}
+          onChange={(value) => {
+            studentList.map((stud) => {
+              if (stud?._id === value) setSelectedStudent(stud);
+              return;
+            });
+            setDataSource(
+              courses?.map((course, i) => {
+                if (course?.students.some((id) => id === value))
+                  return {
+                    key: i.toString(),
+                    code: course?.code,
+                    course: course?.title,
+                    semester: course?.semester,
+                    attended: course?.marks[0]?.score.toString(),
+                    total: "60",
+                  };
+              })
+            );
+          }}
+          placeholder="Students to pick from"
         >
-          <Option key="1">Student name</Option>
-          <Option key="2">Student name 2</Option>
+          {studentList?.map((stud) => (
+            <Option key={stud?._id} value={stud?._id}>
+              {stud?.firstname} {stud?.lastname}
+            </Option>
+          ))}
+          {/* <Option key="2">Student name 2</Option>
           <Option key="3">Student name 3</Option>
-          <Option key="4">Student name 4</Option>
+          <Option key="4">Student name 4</Option> */}
         </Select>
+      </Col>
 
+      <Col span={24}>
         <Table
           components={components}
           rowClassName={() => "editable-row"}
@@ -450,46 +604,25 @@ class EditableTableMarks extends React.Component {
           dataSource={dataSource}
           columns={columns}
         />
-      </div>
-    );
-  }
+      </Col>
+    </Row>
+  );
 }
 
-function Courses({ user, status, courses }) {
-  console.log("user session", user);
-  console.log("Student status", status);
-  status = user != null || user != undefined ? JSON.parse(status) : null;
-  user = user != null || user != undefined ? JSON.parse(user) : null;
-  courses =
-    courses != null || courses != undefined ? JSON.parse(courses) : null;
-  console.log("Courses", courses);
+function Courses({ user, students, courses }) {
   return (
     <>
-      <Row gutter={8} style={{ margin: 0, padding: 0, width: "100%" }}>
+      <Row gutter={[8, 32]} style={{ margin: 0, padding: 0, width: "100%" }}>
         <Col span={24}>
           <h1>Manage Attendance and Marks</h1>
         </Col>
         <Col span={24}>
           <h2>Attendance</h2>
-          {status == "no_data" ? (
-            <p>
-              You need to add your student info before you can add courses. Go
-              to <a href="/students">Student Info</a>
-            </p>
-          ) : (
-            <EditableTableAtt courses={courses} />
-          )}
+          <EditableTableAtt courses={courses} students={students} />
         </Col>
         <Col span={24}>
           <h2>Marks (Both Test and Exams Total)</h2>
-          {status == "no_data" ? (
-            <p>
-              You need to add your student info before you can add courses. Go
-              to <a href="/students">Student Info</a>
-            </p>
-          ) : (
-            <EditableTableMarks courses={courses} />
-          )}
+          <EditableTableMarks courses={courses} students={students} />
         </Col>
       </Row>
     </>
@@ -498,37 +631,29 @@ function Courses({ user, status, courses }) {
 
 export default withLayout(Courses);
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps(ctx) {
   try {
-    await applySession(req, res, sessionOptions);
-    console.log("USER SESSION from server side props", req?.session?.user);
-    let user = JSON.stringify(req?.session?.user);
-    var courses;
+    const session = await getSession(ctx);
+    console.log("USER SESSION from server side props", session);
+    const { user } = session;
 
     // check is the student has set their data and that it matches their account
-    let studentCount = await Student.count();
-    const getStatus = async () => {
-      if (studentCount <= 0 || studentCount == null) {
-        return "no_data";
-      } else {
-        var data = await Student.findOne({ email: req?.session?.user?.email });
-        courses = await Course.find({
-          level: data?.currentLevel,
-          semester: data?.semester,
-        });
-        return data != null ? "yes_data" : "no_data";
-      }
-    };
-    let status = await getStatus();
-    console.log(status);
-    status = JSON.stringify(status);
-    courses = courses ? JSON.stringify(courses) : null;
+    const studentCount = await Student.count();
+    console.log(studentCount);
 
-    // if (!user) return { props: {} };
+    const students = await Student.find({}).populate("courses").exec();
+    const courses = await Course.find({}).populate().exec();
+    console.log(students, courses, "students logs");
+
     return {
-      props: { user, status, courses },
+      props: {
+        user,
+        students: JSON.parse(JSON.stringify(students)),
+        courses: JSON.parse(JSON.stringify(courses)),
+      },
     };
   } catch (e) {
+    console.error(e);
     return {
       props: {},
     };

@@ -24,7 +24,7 @@ try {
       required: [true, "Please enter a unique email address"],
     },
     phone: { type: String, required: true },
-    courses: { type: String, required: false },
+    courses: { type: [ObjectId], ref: "Course" },
     faculty: { type: String, required: false },
     department: { type: String, required: false },
     programme: {
