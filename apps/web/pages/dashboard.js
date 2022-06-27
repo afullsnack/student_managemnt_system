@@ -123,11 +123,11 @@ function Dashboard({ user, students }) {
     });
     setSeries([
       {
-        name: "series-1",
+        name: "MTH101",
         data: [30, 40, 45, 50, 49, 60, 70, 92],
       },
       {
-        name: "series-2",
+        name: "PHY101",
         data: [60, 10, 45, 90, 49, 15, 70, 92],
       },
     ]);

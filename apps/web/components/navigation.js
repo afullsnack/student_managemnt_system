@@ -1,4 +1,3 @@
-
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Menu } from "ui";
@@ -23,7 +22,7 @@ export default function Navigation() {
       <Menu.Item key="/courses">Manage Marks and attendance</Menu.Item>
       {/* <Menu.Item key="/classes">Classes</Menu.Item> */}
       <Menu.Item key="/semester_pred">Semester Predictions</Menu.Item>
-      <Menu.Item key="/category_pred">category Predictions</Menu.Item>
+      {/* <Menu.Item key="/category_pred">category Predictions</Menu.Item> */}
       {/* <Menu.Item key="/grading">Grading Info</Menu.Item> */}
     </Menu>
   );
